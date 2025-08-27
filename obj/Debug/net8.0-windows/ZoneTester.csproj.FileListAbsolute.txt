@@ -18,3 +18,4 @@ C:\Users\Nick\ZoneTester\obj\Debug\net8.0-windows\refint\ZoneTester.dll
 C:\Users\Nick\ZoneTester\obj\Debug\net8.0-windows\ZoneTester.pdb
 C:\Users\Nick\ZoneTester\obj\Debug\net8.0-windows\ZoneTester.genruntimeconfig.cache
 C:\Users\Nick\ZoneTester\obj\Debug\net8.0-windows\ref\ZoneTester.dll
+C:\Users\Nick\ZoneTester\obj\Debug\net8.0-windows\ZoneTester.sourcelink.json
