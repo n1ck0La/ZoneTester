@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,30 +85,71 @@ namespace ZoneTester
             logBox.SelectionColor = logBox.ForeColor;
         }
 
-        // --- Step 1: DHCP / IP info (quick snapshot) ---
+        // --- Step 1: Wired NIC IP info ---
         private void ShowDhcpInfo()
         {
             try
             {
-                var psi = new ProcessStartInfo("ipconfig", "/all")
-                {
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                using var p = Process.Start(psi);
-                string output = p!.StandardOutput.ReadToEnd();
-                p.WaitForExit();
+                Log("Wired NIC IPs:");
 
-                Log("DHCP / IP info (first ~80 lines):");
-                foreach (var line in output.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Take(80))
-                    Log(line);
-                Log("… (truncated)");
+                var nics = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(n => IsWired(n));
+
+                if (!nics.Any())
+                {
+                    Log("No wired network interfaces found.");
+                    return;
+                }
+
+                foreach (var nic in nics)
+                {
+                    Log($"{nic.Name} - {nic.Description}");
+                    var ips = nic.GetIPProperties().UnicastAddresses
+                        .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork);
+
+                    foreach (var ipInfo in ips)
+                    {
+                        var ip = ipInfo.Address;
+                        if (IsRedZone(ip))
+                            Log($"  {ip} (redzone)", Color.Green);
+                        else if (IsBlackZone(ip))
+                            Log($"  {ip} (blackzone)", Color.Green);
+                        else
+                            Log($"  {ip}", Color.Red);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log($"ipconfig failed: {ex.Message}");
+                Log($"NIC enumeration failed: {ex.Message}");
             }
+        }
+
+        private static bool IsWired(NetworkInterface ni)
+        {
+            switch (ni.NetworkInterfaceType)
+            {
+                case NetworkInterfaceType.Ethernet:
+                case NetworkInterfaceType.Ethernet3Megabit:
+                case NetworkInterfaceType.FastEthernetFx:
+                case NetworkInterfaceType.FastEthernetT:
+                case NetworkInterfaceType.GigabitEthernet:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool IsRedZone(IPAddress ip)
+        {
+            var b = ip.GetAddressBytes();
+            return b.Length >= 2 && b[0] == 10 && b[1] == 10;
+        }
+
+        private static bool IsBlackZone(IPAddress ip)
+        {
+            var b = ip.GetAddressBytes();
+            return b.Length >= 2 && b[0] == 11 && b[1] == 11;
         }
 
         // --- Step 2: Ping target ---
