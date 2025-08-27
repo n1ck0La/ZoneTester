@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing;
 using PacketDotNet;           // EthernetPacket, Packet
 using SharpPcap;              // API + GetPacketStatus
 using SharpPcap.LibPcap;      // LibPcapLiveDevice (filter support)
@@ -17,7 +18,7 @@ namespace ZoneTester
     {
         private Button btnRed;
         private Button btnBlack;
-        private TextBox logBox;
+        private RichTextBox logBox;
 
         public MainForm()
         {
@@ -28,18 +29,18 @@ namespace ZoneTester
 
             btnRed = new Button { Text = "Test Red Zone", Left = 12, Top = 12, Width = 140, Height = 34 };
             btnBlack = new Button { Text = "Test Black Zone", Left = 162, Top = 12, Width = 140, Height = 34 };
-            logBox = new TextBox
+            logBox = new RichTextBox
             {
                 Multiline = true,
                 ReadOnly = true,
-                ScrollBars = ScrollBars.Both,
+                ScrollBars = RichTextBoxScrollBars.Both,
                 WordWrap = false,
                 Left = 12,
                 Top = 60,
                 Width = ClientSize.Width - 24,
                 Height = ClientSize.Height - 72,
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                Font = new System.Drawing.Font("Consolas", 10)
+                Font = new Font("Consolas", 10)
             };
 
             Controls.Add(btnRed);
@@ -74,10 +75,12 @@ namespace ZoneTester
             }
         }
 
-        private void Log(string msg)
+        private void Log(string msg, Color? color = null)
         {
             var ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            logBox.SelectionColor = color ?? logBox.ForeColor;
             logBox.AppendText($"[{ts}] {msg}\r\n");
+            logBox.SelectionColor = logBox.ForeColor;
         }
 
         // --- Step 1: DHCP / IP info (quick snapshot) ---
@@ -135,14 +138,14 @@ namespace ZoneTester
                     var min = rtts.Take(ok).Min();
                     var max = rtts.Take(ok).Max();
                     var avg = rtts.Take(ok).Average();
-                    Log($"Ping OK — rtt ms (min/avg/max): {min}/{Math.Round(avg, 2)}/{max}");
+                    Log($"Ping OK — rtt ms (min/avg/max): {min}/{Math.Round(avg, 2)}/{max}", Color.Green);
                 }
                 else
                 {
-                    Log("Ping FAILED.");
+                    Log("Ping FAILED.", Color.Red);
                 }
             }
-            catch (Exception ex) { Log($"Ping error: {ex.Message}"); }
+            catch (Exception ex) { Log($"Ping error: {ex.Message}", Color.Red); }
         }
 
         // --- Step 3: HTTP GET (curl-equivalent) ---
@@ -150,18 +153,25 @@ namespace ZoneTester
         {
             try
             {
-                using var http = new HttpClient() { Timeout = TimeSpan.FromSeconds(3) };
+                var handler = new HttpClientHandler { AllowAutoRedirect = true };
+                using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(3) };
                 var url = $"http://{ip}/";
                 Log($"HTTP GET {url} …");
                 var resp = await http.GetAsync(url);
+                var finalUrl = resp.RequestMessage?.RequestUri?.ToString();
+                if (!string.IsNullOrEmpty(finalUrl) && finalUrl != url)
+                {
+                    Log($"Redirected to {finalUrl}");
+                }
                 var body = await resp.Content.ReadAsStringAsync();
-                Log($"HTTP {(int)resp.StatusCode} {resp.ReasonPhrase}");
+                Log($"HTTP {(int)resp.StatusCode} {resp.ReasonPhrase}",
+                    resp.IsSuccessStatusCode ? Color.Green : Color.Red);
                 var preview = body.Length > 200 ? body.Substring(0, 200) + " …" : body;
                 Log("Body preview:");
                 foreach (var line in preview.Replace("\r", "").Split('\n'))
                     Log(line);
             }
-            catch (Exception ex) { Log($"HTTP error: {ex.Message}"); }
+            catch (Exception ex) { Log($"HTTP error: {ex.Message}", Color.Red); }
         }
 
         // --- Step 4: LLDP discovery (reflection-based polling; works with SharpPcap 6.x or 7.x) ---
