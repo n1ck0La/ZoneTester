@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "dgSpecHash": "jorCiCRNTkg=",
+  "dgSpecHash": "3CiSyaqERkg=",
   "success": true,
   "projectFilePath": "C:\\Users\\Nick\\ZoneTester\\ZoneTester.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Nick\\.nuget\\packages\\packetdotnet\\1.4.8\\packetdotnet.1.4.8.nupkg.sha512",
-    "C:\\Users\\Nick\\.nuget\\packages\\sharppcap\\6.3.1\\sharppcap.6.3.1.nupkg.sha512",
-    "C:\\Users\\Nick\\.nuget\\packages\\system.memory\\4.6.3\\system.memory.4.6.3.nupkg.sha512",
-    "C:\\Users\\Nick\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
-    "C:\\Users\\Nick\\.nuget\\packages\\system.text.encoding.codepages\\9.0.5\\system.text.encoding.codepages.9.0.5.nupkg.sha512",
     "C:\\Users\\Nick\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.19\\microsoft.netcore.app.ref.8.0.19.nupkg.sha512",
     "C:\\Users\\Nick\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.19\\microsoft.windowsdesktop.app.ref.8.0.19.nupkg.sha512",
     "C:\\Users\\Nick\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.19\\microsoft.aspnetcore.app.ref.8.0.19.nupkg.sha512",
