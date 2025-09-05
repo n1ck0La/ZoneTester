@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ZoneTester")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+95c496ab97e4578e9f5431964c3d4e34f452de78")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6cd6525e76e8b3b4a74766e1f07697e97c57359d")]
 [assembly: System.Reflection.AssemblyProductAttribute("ZoneTester")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ZoneTester")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
